@@ -13,8 +13,6 @@ ENV TERM xterm
 # Use baseimage-docker's init system
 CMD ["/sbin/my_init"]
 
-RUN apt-get update
-
 RUN apt-get update && \
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
 wget \
@@ -23,16 +21,15 @@ xdg-utils \
 ImageMagick && \
 mkdir /opt/calibre
 
-RUN mkdir /downloads
 RUN mkdir /config
 
-VOLUME ["/config", "/opt/calibre", "/downloads" ]
+VOLUME ["/config"]
 
 EXPOSE 8080
 
+RUN cd /opt && \
+wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main('/opt/', True)"
 
 # Add firstrun.sh to execute during container startup
 ADD firstrun.sh /etc/my_init.d/firstrun.sh
 RUN chmod +x /etc/my_init.d/firstrun.sh
-
-#ADD crons.conf /home/crons.conf
